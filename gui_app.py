@@ -100,8 +100,14 @@ class SupplyFuzzApp(ctk.CTk):
         self.time_entry.insert(0, "1")
         self.time_entry.grid(row=0, column=2, padx=(5, 10))
 
+        self.use_dict_var = ctk.BooleanVar(value=True)
+        self.dict_check = ctk.CTkCheckBox(
+            self.input_frame, text="Dicționar hibrid (static→fuzz)",
+            variable=self.use_dict_var)
+        self.dict_check.grid(row=0, column=3, padx=10)
+
         self.scan_btn = ctk.CTkButton(self.input_frame, text="▶ Start Scanare", command=self.toggle_scan, fg_color="#28a745", hover_color="#218838")
-        self.scan_btn.grid(row=0, column=3, padx=10, pady=10)
+        self.scan_btn.grid(row=0, column=4, padx=10, pady=10)
 
         self.progress_frame = ctk.CTkFrame(tab_dash, fg_color="transparent")
         self.progress_frame.grid(row=1, column=0, sticky="ew", pady=(0, 10))
@@ -156,10 +162,14 @@ class SupplyFuzzApp(ctk.CTk):
                 parts = [p.strip().replace('`', '') for p in line.split('|') if p.strip()]
                 if len(parts) >= 4: targets.append(parts)
             elif "Statistici pentru" in line: pkg_name = line.split("`")[1] if "`" in line else "Pachet"
-            elif "* **Viteză:**" in line or "* **Viteza:**" in line: stats['speed'] = line.split(":")[-1].strip()
-            elif "* **Total execuții:**" in line or "* **Total executii:**" in line: stats['execs'] = line.split(":")[-1].strip()
-            elif "* **Stabilitate:**" in line: stats['stability'] = line.split(":")[-1].strip()
-            elif "* **Crashes:**" in line: stats['crashes'] = line.split(":")[-1].replace('**', '').strip()
+            elif "**Dictionar:**" in line: stats['dict'] = line.split(":", 1)[-1].replace("*", "").strip()
+            elif "**Durata fuzzing:**" in line or "**Durată fuzzing:**" in line: stats['duration'] = line.split(":", 1)[-1].replace("*", "").strip()
+            elif "**Acoperire" in line: stats['coverage'] = line.split(":")[-1].replace("*", "").strip()
+            elif "**Elemente corpus" in line: stats['corpus'] = line.split(":")[-1].replace("*", "").strip()
+            elif "**Viteză:**" in line or "**Viteza:**" in line: stats['speed'] = line.split(":")[-1].replace("*", "").strip()
+            elif "**Total execuții:**" in line or "**Total executii:**" in line: stats['execs'] = line.split(":")[-1].replace("*", "").strip()
+            elif "**Stabilitate:**" in line: stats['stability'] = line.split(":")[-1].replace("*", "").strip()
+            elif "**Crashes:**" in line: stats['crashes'] = line.split(":")[-1].replace('*', '').strip()
 
         # 2. Construirea Interfeței Grafice
         
@@ -203,29 +213,42 @@ class SupplyFuzzApp(ctk.CTk):
         s_title.grid(row=3, column=0, sticky="w", pady=(10, 5))
 
         if stats:
-            cards_frame = ctk.CTkFrame(self.report_scroll, fg_color="transparent")
-            cards_frame.grid(row=4, column=0, sticky="ew")
-            cards_frame.grid_columnconfigure((0,1,2,3), weight=1)
+            # --- Badge stare dictionar (componenta hibrida) ---
+            dict_state = stats.get('dict', 'N/A')
+            su = dict_state.upper()
+            is_active = ("ACTIV" in su) and ("INACTIV" not in su)
+            badge_color = "#6f42c1" if is_active else "#495057"  # mov daca hibrid, gri daca baseline
+            badge_text = ("🧬 Dicționar hibrid ACTIV (static → fuzz)"
+                          if is_active else "○ Dicționar INACTIV (baseline)")
+            badge = ctk.CTkFrame(self.report_scroll, fg_color=badge_color, corner_radius=8)
+            badge.grid(row=4, column=0, sticky="w", pady=(0, 10))
+            ctk.CTkLabel(badge, text=badge_text, text_color="white",
+                         font=ctk.CTkFont(size=13, weight="bold"), padx=14, pady=6).pack()
 
-            # Definim cardurile
-            crash_color = "#dc3545" if stats.get('crashes', '0') != '0' else "#28a745" # Roșu dacă sunt crash-uri, Verde dacă e 0
-            
+            cards_frame = ctk.CTkFrame(self.report_scroll, fg_color="transparent")
+            cards_frame.grid(row=5, column=0, sticky="ew")
+            cards_frame.grid_columnconfigure((0, 1, 2), weight=1)
+
+            crash_color = "#dc3545" if stats.get('crashes', '0') != '0' else "#28a745"
+
             card_data = [
-                ("Viteză Fuzzing", stats.get('speed', '0'), "#17a2b8"),     # Cyan
-                ("Execuții Totale", stats.get('execs', '0'), "#007bff"),    # Albastru
-                ("Stabilitate", stats.get('stability', '0%'), "#fd7e14"),   # Portocaliu
-                ("Crashes Găsite", stats.get('crashes', '0'), crash_color)  # Dinamic
+                ("Acoperire (coverage)", stats.get('coverage', 'N/A'), "#20c997"),  # verde-teal
+                ("Elemente corpus", stats.get('corpus', 'N/A'), "#6610f2"),         # indigo
+                ("Crashes Găsite", stats.get('crashes', '0'), crash_color),         # dinamic
+                ("Durată Fuzzing", stats.get('duration', 'N/A'), "#e83e8c"),        # roz
+                ("Viteză Fuzzing", stats.get('speed', '0'), "#17a2b8"),             # cyan
+                ("Execuții Totale", stats.get('execs', '0'), "#007bff"),            # albastru
+                ("Stabilitate", stats.get('stability', '0%'), "#fd7e14"),           # portocaliu
             ]
 
             for i, (title, value, color) in enumerate(card_data):
+                r, c = divmod(i, 3)
                 card = ctk.CTkFrame(cards_frame, fg_color=color, corner_radius=10)
-                card.grid(row=0, column=i, padx=10, pady=10, sticky="ew")
-                
-                v_lbl = ctk.CTkLabel(card, text=value, font=ctk.CTkFont(size=24, weight="bold"), text_color="white")
-                v_lbl.pack(pady=(15, 0))
-                
-                t_lbl = ctk.CTkLabel(card, text=title, font=ctk.CTkFont(size=12), text_color="white")
-                t_lbl.pack(pady=(0, 15))
+                card.grid(row=r, column=c, padx=10, pady=10, sticky="ew")
+                ctk.CTkLabel(card, text=value, font=ctk.CTkFont(size=24, weight="bold"),
+                             text_color="white").pack(pady=(15, 0))
+                ctk.CTkLabel(card, text=title, font=ctk.CTkFont(size=12),
+                             text_color="white").pack(pady=(0, 15))
         else:
             # Sistem inteligent de decizie a erorii pentru raportul grafic
             if "V8" in md_text or "Node.js interne" in md_text or "napi_" in md_text.lower():
@@ -268,10 +291,12 @@ class SupplyFuzzApp(ctk.CTk):
             self.scan_btn.configure(text="⏹ Oprește Scanarea", fg_color="#dc3545", hover_color="#c82333")
             self.reset_steps_ui()
             self.results_textbox.delete("0.0", "end")
-            self.results_textbox.insert("end", f"[*] Inițializare scanare pentru: {url} ({minutes} min)\n")
+            use_dict = self.use_dict_var.get()
+            mod = "cu dicționar hibrid" if use_dict else "baseline (fără dicționar)"
+            self.results_textbox.insert("end", f"[*] Inițializare scanare pentru: {url} ({minutes} min) — {mod}\n")
             self.tabview.set("Dashboard")
 
-            threading.Thread(target=self.run_real_scan, args=(url, minutes), daemon=True).start()
+            threading.Thread(target=self.run_real_scan, args=(url, minutes, use_dict), daemon=True).start()
         else:
             self.results_textbox.insert("end", "\n[!] Oprire de urgență...\n")
             self.is_scanning = False
@@ -279,7 +304,7 @@ class SupplyFuzzApp(ctk.CTk):
             import subprocess
             threading.Thread(target=lambda: subprocess.run(["docker", "stop", "supply_fuzz_run"], capture_output=True), daemon=True).start()
 
-    def run_real_scan(self, url, minutes):
+    def run_real_scan(self, url, minutes, use_dict=True):
         timeout_seconds = int(minutes * 60)
 
         def update_gui(message, progress=None):
@@ -299,7 +324,8 @@ class SupplyFuzzApp(ctk.CTk):
                     self.update_step_ui(3, "done")
 
         try:
-            orch = Orchestrator(target_input=url, timeout=timeout_seconds, status_callback=update_gui)
+            orch = Orchestrator(target_input=url, timeout=timeout_seconds,
+                                status_callback=update_gui, use_dictionary=use_dict)
             orch.run()
             
             # Caută ultimul raport (in subfoldere) și îl afișează automat

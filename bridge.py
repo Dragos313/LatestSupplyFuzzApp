@@ -1,4 +1,5 @@
 import json
+import re
 import struct
 from pathlib import Path
 
@@ -19,6 +20,7 @@ class Bridge:
             targets = json.load(f)
 
         generated = []
+        dict_done = set()
         for target in targets:
             # FIX #2: ignoram sink-urile (findings). Doar entry-points devin harness.
             if target.get("kind", "entrypoint") != "entrypoint":
@@ -30,12 +32,95 @@ class Bridge:
             h_path = self._write_harness(target)
             if h_path:
                 self._generate_smart_seeds(target)
+                # Dictionar AFL derivat din analiza statica a sursei (o data per pachet)
+                pkg = target['package_name']
+                if pkg not in dict_done:
+                    self._generate_dictionary(target)
+                    dict_done.add(pkg)
                 generated.append({
                     "harness": h_path,
                     "package_name": target['package_name'],
                     "function_name": target['function_name'],
                 })
         return generated
+
+    # -------------------------------------------------------------------------
+    # DICTIONAR AFL (componenta HIBRIDA: analiza statica -> fuzzing dinamic)
+    # Extrage tokeni (siruri literale, cuvinte-cheie de parsing) din codul sursa
+    # al tintei si ii scrie ca dictionar AFL (-x). Acesti tokeni ajuta fuzzer-ul
+    # sa treaca de verificari structurale (ex: 'true', 'null', '{', '}', chei).
+    # -------------------------------------------------------------------------
+    _STOP_WORDS = {b"software", b"as is", b"copyright", b"warranty",
+                   b"the", b"and", b"for"}
+
+    def _generate_dictionary(self, target, max_tokens=256):
+        package_name = target['package_name']
+        src_dir = Path(target.get('package_path') or (self.workspace / package_name))
+        if not src_dir.exists():
+            src_dir = self.workspace / package_name
+        if not src_dir.exists():
+            return None
+
+        exclude = ("/test", "/tests", "/example", "/benchmark",
+                   "/third_party", "/node_modules", "/.git")
+        lit_re = re.compile(r'"((?:\\.|[^"\\])*)"')
+        seen = {}
+
+        files = [f for f in src_dir.rglob("*.[ch]*")
+                 if not any(e in str(f).replace("\\", "/").lower() for e in exclude)]
+        for f in files[:200]:
+            try:
+                text = f.read_text(encoding="utf-8", errors="replace")
+            except Exception:
+                continue
+            for m in lit_re.findall(text):
+                try:
+                    val = bytes(m, "utf-8").decode("unicode_escape").encode("latin-1", "replace")
+                except Exception:
+                    val = m.encode("utf-8", "replace")
+                if not (1 <= len(val) <= 24):
+                    continue
+                if re.search(rb'\s', val):                      # fara spatii/newline
+                    continue
+                if b'%' in val:                                 # fara format strings
+                    continue
+                if val.lower().endswith((b'.h', b'.c', b'.cpp', b'.hpp', b'.cc')):
+                    continue
+                if val.lower() in self._STOP_WORDS:
+                    continue
+                if not re.search(rb'[A-Za-z0-9{}\[\]:,]', val):
+                    continue
+                seen[val] = seen.get(val, 0) + 1
+
+        tokens = [t for t, _ in sorted(seen.items(), key=lambda kv: -kv[1])[:max_tokens]]
+        if not tokens:
+            return None
+
+        dict_path = self.workspace / package_name / "afl_tokens.dict"
+        dict_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(dict_path, "w", encoding="utf-8") as fh:
+            fh.write("# Dictionar AFL generat din analiza statica a sursei (Supply-Fuzz Bridge)\n")
+            for i, tok in enumerate(tokens):
+                fh.write(f'kw_{i:03d}="{self._afl_escape(tok)}"\n')
+
+        print(f"   [Bridge] Dictionar hibrid: {len(tokens)} tokeni -> {dict_path}")
+        return dict_path
+
+    @staticmethod
+    def _afl_escape(b):
+        """Escapeaza un sir de bytes pentru formatul de dictionar AFL."""
+        out = []
+        for byte in b:
+            ch = chr(byte)
+            if ch == '\\':
+                out.append('\\\\')
+            elif ch == '"':
+                out.append('\\"')
+            elif 32 <= byte < 127:
+                out.append(ch)
+            else:
+                out.append(f'\\x{byte:02x}')
+        return "".join(out)
 
     # -------------------------------------------------------------------------
     # SEED GENERATION INTELIGENTA

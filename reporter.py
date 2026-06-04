@@ -4,8 +4,9 @@ from pathlib import Path
 from datetime import datetime
 
 class Reporter:
-    def __init__(self, scan_report_path, workspace, v8_detected=False):
+    def __init__(self, scan_report_path, workspace, v8_detected=False, use_dictionary=True):
         self.report_path = Path(scan_report_path)
+        self.use_dictionary = use_dictionary
         self.workspace = Path(workspace)
         self.v8_detected = v8_detected
 
@@ -19,6 +20,27 @@ class Reporter:
                         key, val = line.split(':', 1)
                         stats[key.strip()] = val.strip()
         return stats
+
+    @staticmethod
+    def _format_duration(stats):
+        """Durata efectiva a fuzzing-ului, din fuzzer_stats AFL++."""
+        secs = None
+        try:
+            if stats.get('run_time'):
+                secs = int(float(stats['run_time']))
+            elif stats.get('last_update') and stats.get('start_time'):
+                secs = int(float(stats['last_update']) - float(stats['start_time']))
+        except (ValueError, TypeError):
+            secs = None
+        if secs is None or secs < 0:
+            return "N/A"
+        h, rem = divmod(secs, 3600)
+        m, s = divmod(rem, 60)
+        if h:
+            return f"{h}h {m}m {s}s"
+        if m:
+            return f"{m}m {s}s"
+        return f"{s}s"
 
     def _collect_crashes(self, package_name, report_dir):
         crashes_src = self.workspace / package_name / "out" / "default" / "crashes"
@@ -156,8 +178,24 @@ class Reporter:
 
         # 3. Statistici fuzzer
         report_md += "\n## 3. Rezultate Validare Dinamica (The Hammer)\n"
+        dict_path = self.workspace / pkg_name / "afl_tokens.dict"
+        if dict_path.exists() and self.use_dictionary:
+            try:
+                n_tok = sum(1 for ln in dict_path.read_text(encoding="utf-8",
+                            errors="replace").splitlines() if ln.startswith("kw_"))
+            except Exception:
+                n_tok = 0
+            report_md += f"* **Dictionar hibrid (static->fuzz):** {n_tok} tokeni extrasi din sursa\n"
         if stats:
+            cvg = stats.get('bitmap_cvg', 'N/A')
+            corpus = stats.get('corpus_count', stats.get('paths_total', 'N/A'))
+            duration = self._format_duration(stats)
             report_md += f"### Statistici pentru `{pkg_name}`\n"
+            dict_used = self.use_dictionary and dict_path.exists()
+            report_md += f"* **Dictionar:** {'ACTIV (hibrid)' if dict_used else 'INACTIV (baseline)'}\n"
+            report_md += f"* **Durata fuzzing:** {duration}\n"
+            report_md += f"* **Acoperire (coverage):** {cvg}\n"
+            report_md += f"* **Elemente corpus (corpus_count):** {corpus}\n"
             report_md += f"* **Viteza:** {stats.get('execs_per_sec', '0')} exec/sec\n"
             report_md += f"* **Total executii:** {stats.get('execs_done', '0')}\n"
             report_md += f"* **Stabilitate:** {stats.get('stability', '0%')}\n"

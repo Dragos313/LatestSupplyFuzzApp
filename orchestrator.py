@@ -15,12 +15,14 @@ from bridge import Bridge
 from hammer import Hammer
 
 class Orchestrator:
-    def __init__(self, target_input, timeout=3600, output_file="scan_report.json", status_callback=None):
+    def __init__(self, target_input, timeout=3600, output_file="scan_report.json",
+                 status_callback=None, use_dictionary=True):
         self.target_input = target_input
         self.timeout = timeout
         self.output_file = output_file
         self.workspace = (Path.cwd() / "fuzz_workspace").resolve()
         self.status_callback = status_callback
+        self.use_dictionary = use_dictionary
         self.v8_detected = False
 
     def _log_status(self, message, progress=None):
@@ -200,7 +202,8 @@ class Orchestrator:
                 package_name=chosen['package_name'],
                 harness_file=chosen['harness'],
                 timeout_seconds=self.timeout,
-                log_callback=lambda msg: self._log_status(msg, progress=None)
+                log_callback=lambda msg: self._log_status(msg, progress=None),
+                use_dictionary=self.use_dictionary
             )
             fuzzed_pkg = chosen['package_name']
         else:
@@ -222,7 +225,7 @@ class Orchestrator:
         # Pasul 4: The Reporter (ruleaza intotdeauna)
         self._log_status("[+] Pasul 4: Generare raport final...", 0.90)
         from reporter import Reporter
-        reporter_engine = Reporter(self.output_file, self.workspace, v8_detected=self.v8_detected)
+        reporter_engine = Reporter(self.output_file, self.workspace, v8_detected=self.v8_detected, use_dictionary=self.use_dictionary)
         raport_final = reporter_engine.generate_final_report(fuzzed_package=fuzzed_pkg)
 
         self._log_status(f"\nProiect finalizat!\nRaportul tau este aici: {raport_final}", 1.0)

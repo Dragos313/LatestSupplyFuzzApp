@@ -15,7 +15,8 @@ class Hammer:
             capture_output=True
         )
 
-    def run_fuzzing(self, package_name, harness_file, timeout_seconds=60, log_callback=None):
+    def run_fuzzing(self, package_name, harness_file, timeout_seconds=60,
+                    log_callback=None, use_dictionary=True):
         harness_name = Path(harness_file).name
 
         subprocess.run(["docker", "rm", "-f", self.container_name], capture_output=True)
@@ -91,9 +92,17 @@ export AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1
 export AFL_NO_UI=1
 export AFL_SKIP_CRASHES=1
 
+DICT_ARG=""
+if {"true" if use_dictionary else "false"} && [ -f ./afl_tokens.dict ]; then
+  DICT_ARG="-x ./afl_tokens.dict"
+  echo "[*] Dictionar hibrid ACTIV: $(grep -c '^kw_' ./afl_tokens.dict) tokeni (-x)."
+else
+  echo "[*] Dictionar hibrid INACTIV (rulare baseline)."
+fi
+
 if [ -f ./fuzzed_binary ]; then
   echo '[*] Incepe fuzzing-ul hibrid cu seed-uri inteligente...'
-  afl-fuzz -V {timeout_seconds} -m none -i in -o out ./fuzzed_binary @@
+  afl-fuzz -V {timeout_seconds} -m none $DICT_ARG -i in -o out ./fuzzed_binary @@
 else
   echo '[-] Binarul nu exista, fuzzing sarit.'
 fi
