@@ -1,0 +1,427 @@
+[
+    {
+        "kind": "entrypoint",
+        "function_name": "read_file",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 206,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "const char * filename"
+        ],
+        "harnessable": false,
+        "is_static": true,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "parson_strndup",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 274,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "const char *string",
+            "size_t n"
+        ],
+        "harnessable": false,
+        "is_static": true,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "is_valid_utf8",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 392,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "const char *string",
+            "size_t string_len"
+        ],
+        "harnessable": false,
+        "is_static": true,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "is_decimal",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 404,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "const char *string",
+            "size_t length"
+        ],
+        "harnessable": false,
+        "is_static": true,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "hash_string",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 419,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "const char *string",
+            "size_t n"
+        ],
+        "harnessable": false,
+        "is_static": true,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_object_get_cell_ix",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 555,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "const JSON_Object *object",
+            "const char *key",
+            "size_t key_len",
+            "unsigned long hash",
+            "parson_bool_t *out_found"
+        ],
+        "harnessable": false,
+        "is_static": true,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_object_getn_value",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 622,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "const JSON_Object *object",
+            "const char *name",
+            "size_t name_len"
+        ],
+        "harnessable": false,
+        "is_static": true,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_value_init_string_no_copy",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 774,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "char *string",
+            "size_t length"
+        ],
+        "harnessable": false,
+        "is_static": true,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "process_string",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 856,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "const char *input",
+            "size_t input_len",
+            "size_t *output_len"
+        ],
+        "harnessable": false,
+        "is_static": true,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_serialize_to_buffer_r",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 1146,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "const JSON_Value *value",
+            "char *buf",
+            "int level",
+            "parson_bool_t is_pretty",
+            "char *num_buf"
+        ],
+        "harnessable": false,
+        "is_static": true,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_serialize_string",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 1290,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "const char *string",
+            "size_t len",
+            "char *buf"
+        ],
+        "harnessable": false,
+        "is_static": true,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_value_init_string_with_len",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 1653,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "const char *string",
+            "size_t length"
+        ],
+        "harnessable": true,
+        "is_static": false,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_serialize_to_buffer",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 1805,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "const JSON_Value *value",
+            "char *buf",
+            "size_t buf_size_in_bytes"
+        ],
+        "harnessable": false,
+        "is_static": false,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_serialize_to_buffer_pretty",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 1865,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "const JSON_Value *value",
+            "char *buf",
+            "size_t buf_size_in_bytes"
+        ],
+        "harnessable": false,
+        "is_static": false,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_array_replace_string",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 1945,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "JSON_Array *array",
+            "size_t i",
+            "const char* string"
+        ],
+        "harnessable": false,
+        "is_static": false,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_array_replace_string_with_len",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 1957,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "JSON_Array *array",
+            "size_t i",
+            "const char *string",
+            "size_t len"
+        ],
+        "harnessable": false,
+        "is_static": false,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_array_append_string_with_len",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 2036,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "JSON_Array *array",
+            "const char *string",
+            "size_t len"
+        ],
+        "harnessable": false,
+        "is_static": false,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_object_set_string_with_len",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 2136,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "JSON_Object *object",
+            "const char *name",
+            "const char *string",
+            "size_t len"
+        ],
+        "harnessable": false,
+        "is_static": false,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_object_set_boolean",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 2154,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "JSON_Object *object",
+            "const char *name",
+            "int boolean"
+        ],
+        "harnessable": false,
+        "is_static": false,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_object_dotset_string_with_len",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 2235,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "JSON_Object *object",
+            "const char *name",
+            "const char *string",
+            "size_t len"
+        ],
+        "harnessable": false,
+        "is_static": false,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "entrypoint",
+        "function_name": "json_object_dotset_boolean",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 2259,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "signature_args": [
+            "JSON_Object *object",
+            "const char *name",
+            "int boolean"
+        ],
+        "harnessable": false,
+        "is_static": false,
+        "rule_id": "find-fuzzable-c-functions",
+        "severity": "WARNING",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "finding",
+        "function_name": "parson_strdup",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 281,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "rule_id": "unsafe-memcpy",
+        "severity": "WARNING",
+        "message": "memcpy/memmove (CWE-122): verificati ca n nu depaseste dimensiunea lui output_string.",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "finding",
+        "function_name": "json_array_free",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 756,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "rule_id": "unsafe-memcpy",
+        "severity": "WARNING",
+        "message": "memcpy/memmove (CWE-122): verificati ca array->count * sizeof(JSON_Value*) nu depaseste dimensiunea lui new_items.",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "finding",
+        "function_name": "get_quoted_string",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 902,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "rule_id": "unsafe-memcpy",
+        "severity": "WARNING",
+        "message": "memcpy/memmove (CWE-122): verificati ca final_size nu depaseste dimensiunea lui resized_output.",
+        "package_name": "parson",
+        "ecosystem": "local"
+    },
+    {
+        "kind": "finding",
+        "function_name": "json_array_replace_value",
+        "file": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson\\parson.c",
+        "line": 1930,
+        "package_path": "D:\\Facultate\\CSML\\Disertatie\\newapp\\fuzz_workspace\\parson",
+        "rule_id": "unsafe-memcpy",
+        "severity": "WARNING",
+        "message": "memcpy/memmove (CWE-122): verificati ca to_move_bytes nu depaseste dimensiunea lui array->items + ix.",
+        "package_name": "parson",
+        "ecosystem": "local"
+    }
+]

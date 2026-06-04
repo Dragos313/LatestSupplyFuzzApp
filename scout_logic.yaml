@@ -1,0 +1,125 @@
+rules:
+
+  # ============================================================
+  # ENTRY-POINTS (target_kind: entrypoint)
+  # Reguli STRANSE: pointer pe bytes (char/uint8_t/void/...) +
+  # lungime numerica reala (size_t/int/long/uintN_t/...), in ambele
+  # ordini, plus parsere cu un singur pointer de string (nume sugestiv).
+  # Tipurile custom (Parent*, Callback, napi_env) sunt excluse, ca sa
+  # nu generam harness-uri C++ care nu compileaza.
+  # ============================================================
+  - id: find-fuzzable-c-functions
+    languages: [c, cpp]
+    severity: WARNING
+    metadata:
+      target_kind: entrypoint
+      cwe: "Fuzzable entry point"
+    patterns:
+      - pattern-either:
+          # buffer + lungime (ordinea buf, len)
+          - patterns:
+              - pattern: $RET $FUNC(..., $T *$BUF, ..., $LT $LEN, ...) { ... }
+              - metavariable-regex:
+                  metavariable: $T
+                  regex: "^(const +)?(unsigned +)?(char|uint8_t|int8_t|void|u_char|byte|wchar_t)$"
+              - metavariable-regex:
+                  metavariable: $LT
+                  regex: "^(const +)?(unsigned +)?(unsigned|size_t|ssize_t|int|long|short|uint8_t|uint16_t|uint32_t|uint64_t|int8_t|int16_t|int32_t|int64_t|size_type)( +(int|long))?$"
+          # buffer + lungime (ordine inversa: len, buf)
+          - patterns:
+              - pattern: $RET $FUNC(..., $LT $LEN, ..., $T *$BUF, ...) { ... }
+              - metavariable-regex:
+                  metavariable: $T
+                  regex: "^(const +)?(unsigned +)?(char|uint8_t|int8_t|void|u_char|byte|wchar_t)$"
+              - metavariable-regex:
+                  metavariable: $LT
+                  regex: "^(const +)?(unsigned +)?(unsigned|size_t|ssize_t|int|long|short|uint8_t|uint16_t|uint32_t|uint64_t|int8_t|int16_t|int32_t|int64_t|size_type)( +(int|long))?$"
+          # parser cu un singur pointer de string, doar daca numele sugereaza parsing
+          - patterns:
+              - pattern-either:
+                  - pattern: $RET $FUNC(const char *$BUF) { ... }
+                  - pattern: $RET $FUNC(char *$BUF) { ... }
+                  - pattern: $RET $FUNC(const unsigned char *$BUF) { ... }
+                  - pattern: $RET $FUNC(const uint8_t *$BUF) { ... }
+              - metavariable-regex:
+                  metavariable: $FUNC
+                  regex: "(?i)(parse|load|read|decode|deserial|scan|lex|tokeniz|import|unmarshal|deflate|inflate|uncompress|decompress)"
+    message: "Fuzzabil: $FUNC"
+
+  # ============================================================
+  # SINK-uri / SEMNALE (target_kind: finding) -> doar in raport
+  # ============================================================
+
+  - id: unsafe-string-copy
+    languages: [c, cpp]
+    severity: ERROR
+    metadata: { target_kind: finding, cwe: CWE-120 }
+    patterns:
+      - pattern-either:
+          - pattern: strcpy($DST, $SRC)
+          - pattern: strcat($DST, $SRC)
+          - pattern: sprintf($BUF, $FMT, ...)
+          - pattern: gets($BUF)
+    message: "Functie nesigura de string (CWE-120). Folositi varianta _s sau snprintf."
+
+  - id: format-string-vulnerability
+    languages: [c, cpp]
+    severity: ERROR
+    metadata: { target_kind: finding, cwe: CWE-134 }
+    patterns:
+      - pattern-either:
+          - pattern: printf($VAR)
+          - pattern: fprintf($FD, $VAR)
+          - pattern: syslog($PRIO, $VAR)
+    message: "Format string vulnerability (CWE-134): primul argument nu este un literal."
+
+  - id: integer-overflow-in-alloc
+    languages: [c, cpp]
+    severity: ERROR
+    metadata: { target_kind: finding, cwe: CWE-190 }
+    patterns:
+      - pattern-either:
+          - pattern: malloc($A * $B)
+          - pattern: calloc($A, $B * $C)
+          - pattern: realloc($PTR, $A * $B)
+    message: "Potential integer overflow in alocare (CWE-190). Folositi checked_mul."
+
+  - id: use-after-free-pattern
+    languages: [c, cpp]
+    severity: ERROR
+    metadata: { target_kind: finding, cwe: CWE-416 }
+    pattern: |
+      free($PTR);
+      ...
+      $PTR = $ANYTHING;
+    message: "Potential Use-After-Free (CWE-416): $PTR este folosit dupa free()."
+
+  - id: unsafe-memcpy
+    languages: [c, cpp]
+    severity: WARNING
+    metadata: { target_kind: finding, cwe: CWE-122 }
+    patterns:
+      - pattern-either:
+          - pattern: memcpy($DST, $SRC, $LEN)
+          - pattern: memmove($DST, $SRC, $LEN)
+    message: "memcpy/memmove (CWE-122): verificati ca $LEN nu depaseste dimensiunea lui $DST."
+
+  - id: signed-unsigned-comparison
+    languages: [c, cpp]
+    severity: WARNING
+    metadata: { target_kind: finding, cwe: CWE-195 }
+    pattern: |
+      int $LEN = ...;
+      ...
+      memcpy($DST, $SRC, $LEN);
+    message: "Conversie signed->unsigned (CWE-195): $LEN este int semnat folosit ca size_t."
+
+  - id: unchecked-malloc
+    languages: [c, cpp]
+    severity: WARNING
+    metadata: { target_kind: finding, cwe: CWE-476 }
+    pattern: |
+      $TYPE *$PTR = malloc($SIZE);
+      ...
+      *$PTR = $VAL;
+    message: "malloc fara verificare NULL (CWE-476): $PTR poate fi NULL."
