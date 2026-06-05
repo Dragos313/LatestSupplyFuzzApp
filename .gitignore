@@ -1,2 +1,3 @@
 scans_history/
 __pycache__/
+fuzz_workspace/

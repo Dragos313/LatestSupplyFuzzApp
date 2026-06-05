@@ -209,6 +209,7 @@ class Orchestrator:
                 use_dictionary=self.use_dictionary
             )
             fuzzed_pkg = chosen['package_name']
+            fuzzed_func = chosen['function_name']
         else:
             if entrypoints and not harnessable:
                 self._log_status(
@@ -224,12 +225,13 @@ class Orchestrator:
             fuzzed_pkg = entrypoints[0]['package_name'] if entrypoints else (
                 findings[0]['package_name'] if findings else 'unknown'
             )
+            fuzzed_func = None
 
         # Pasul 4: The Reporter (ruleaza intotdeauna)
         self._log_status("[+] Pasul 4: Generare raport final...", 0.90)
         from reporter import Reporter
         reporter_engine = Reporter(self.output_file, self.workspace, v8_detected=self.v8_detected, use_dictionary=self.use_dictionary)
-        raport_final = reporter_engine.generate_final_report(fuzzed_package=fuzzed_pkg)
+        raport_final = reporter_engine.generate_final_report(fuzzed_package=fuzzed_pkg, fuzzed_function=fuzzed_func)
 
         self._log_status(f"\nProiect finalizat!\nRaportul tau este aici: {raport_final}", 1.0)
 

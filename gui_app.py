@@ -363,6 +363,7 @@ class SupplyFuzzApp(ctk.CTk):
             "stats": {},
             "dict_active": False,
             "crashes": [],
+            "fuzzed_target": None,
         }
 
         section = None
@@ -430,6 +431,13 @@ class SupplyFuzzApp(ctk.CTk):
 
             # Crashes
             if section == "crashes":
+                if "crash-urile provin din fuzzing" in ls:
+                    m = re.search(r"functiei `([^`]+)`(?:\s*\(([^)]+)\))?", ls)
+                    if m:
+                        data["fuzzed_target"] = {
+                            "func": m.group(1),
+                            "loc": m.group(2) if m.group(2) else None,
+                        }
                 if ls.startswith("### Crash #"):
                     if current_crash:
                         data["crashes"].append(current_crash)
@@ -462,6 +470,18 @@ class SupplyFuzzApp(ctk.CTk):
         data["findings_grouped"] = counts
 
         return data
+
+    @staticmethod
+    def _short_loc(path_str):
+        """'D:\\...\\cJSON.c:2633' → ('cJSON.c:2633', full_path).
+        Pastreaza linia, scurteaza calea la basename pentru afisare."""
+        path, sep, line = path_str.rpartition(":")
+        # daca ultima parte nu e numerica, nu era o linie (ex: 'C:' din Windows)
+        if not sep or not line.strip().isdigit():
+            path, line = path_str, None
+        base = path.replace("\\", "/").rstrip("/").split("/")[-1]
+        short = f"{base}:{line}" if line else base
+        return short, path_str
 
     # ─────────────────────────────────────────
     # REPORT — RENDERER
@@ -554,7 +574,7 @@ class SupplyFuzzApp(ctk.CTk):
         add(tbl, sticky="ew", pady=(0, 8))
         tbl.grid_columnconfigure(2, weight=2)
 
-        for ci, h in enumerate(["Package", "Function", "Source File", "Severity"]):
+        for ci, h in enumerate(["Package", "Function", "Location (File:Line)", "Severity"]):
             ctk.CTkLabel(tbl, text=h,
                          font=ctk.CTkFont(size=10, weight="bold"),
                          text_color=C["muted"], anchor="w").grid(
@@ -569,12 +589,35 @@ class SupplyFuzzApp(ctk.CTk):
         else:
             for ri, target in enumerate(d["targets"], start=2):
                 bg = C["card2"] if ri % 2 == 0 else "transparent"
-                for ci, item in enumerate(target[:4]):
-                    font = (ctk.CTkFont(family=MONO, size=12)
-                            if ci in [1, 2] else ctk.CTkFont(size=12))
-                    ctk.CTkLabel(tbl, text=item, fg_color=bg,
-                                 font=font, text_color=C["text"], anchor="w").grid(
-                        row=ri, column=ci, padx=16, pady=6, sticky="ew")
+                # 0=Package, 1=Function, 2=Location, 3=Severity
+                ctk.CTkLabel(tbl, text=target[0], fg_color=bg,
+                             font=ctk.CTkFont(size=12), text_color=C["text"],
+                             anchor="w").grid(row=ri, column=0, padx=16, pady=6, sticky="ew")
+                ctk.CTkLabel(tbl, text=target[1], fg_color=bg,
+                             font=ctk.CTkFont(family=MONO, size=12), text_color=C["text"],
+                             anchor="w").grid(row=ri, column=1, padx=16, pady=6, sticky="ew")
+
+                # Locatie: badge de cod scurtat (basename:linie)
+                loc_cell = ctk.CTkFrame(tbl, fg_color=bg)
+                loc_cell.grid(row=ri, column=2, padx=16, pady=6, sticky="ew")
+                if len(target) >= 3:
+                    short, full = self._short_loc(target[2])
+                    badge = ctk.CTkLabel(
+                        loc_cell, text=f" {short} ",
+                        font=ctk.CTkFont(family=MONO, size=11),
+                        fg_color=C["step_idle"], corner_radius=4,
+                        text_color=C["teal"])
+                    badge.pack(side="left")
+                    # calea completa, discreta, pentru context
+                    ctk.CTkLabel(loc_cell, text="  📄",
+                                 font=ctk.CTkFont(size=10),
+                                 text_color=C["muted"]).pack(side="left")
+
+                sev = target[3] if len(target) >= 4 else "MEDIUM"
+                ctk.CTkLabel(tbl, text=sev, fg_color=bg,
+                             font=ctk.CTkFont(size=11, weight="bold"),
+                             text_color=C["orange"],
+                             anchor="w").grid(row=ri, column=3, padx=16, pady=6, sticky="ew")
 
         sep()
 
@@ -697,6 +740,27 @@ class SupplyFuzzApp(ctk.CTk):
 
         # ── CRASHES ─────────────────────────────────────
         section_title("💥", f"Confirmed Crashes & PoC  ({len(d['crashes'])})")
+
+        # Banner: ce functie a fost fuzzata + unde se afla in cod
+        ft = d.get("fuzzed_target")
+        if ft and d["crashes"]:
+            banner = ctk.CTkFrame(self.report_scroll, fg_color=C["card"],
+                                  corner_radius=8, border_width=1, border_color=C["border"])
+            add(banner, sticky="ew", pady=(0, 8))
+            binner = ctk.CTkFrame(banner, fg_color="transparent")
+            binner.pack(padx=16, pady=12, anchor="w", fill="x")
+            ctk.CTkLabel(binner, text="🎯  Funcția fuzzată:",
+                         font=ctk.CTkFont(size=11),
+                         text_color=C["muted"]).pack(side="left", padx=(0, 8))
+            ctk.CTkLabel(binner, text=ft["func"],
+                         font=ctk.CTkFont(family=MONO, size=13, weight="bold"),
+                         text_color=C["text"]).pack(side="left", padx=(0, 12))
+            if ft.get("loc"):
+                short, _ = self._short_loc(ft["loc"])
+                ctk.CTkLabel(binner, text=f" {short} ",
+                             font=ctk.CTkFont(family=MONO, size=11),
+                             fg_color=C["step_idle"], corner_radius=4,
+                             text_color=C["teal"]).pack(side="left")
 
         if not d["crashes"]:
             no_crash = ctk.CTkFrame(self.report_scroll, fg_color=C["step_done"],

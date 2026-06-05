@@ -1,5 +1,10 @@
 import subprocess
+import re
 from pathlib import Path
+
+# Coduri ANSI de culoare generate de AFL++ pentru terminal (ex: \x1b[1;94m = albastru bold).
+# GUI-ul nu le interpreteaza, asa ca le eliminam.
+_ANSI_RE = re.compile(r'\x1b\[[0-9;]*[mGKHF]')
 
 class Hammer:
     def __init__(self, workspace):
@@ -116,7 +121,7 @@ fi
 
         v8_reported = False
         for line in process.stdout:
-            clean_line = line.strip()
+            clean_line = _ANSI_RE.sub('', line).strip()
             if not clean_line:
                 continue
 

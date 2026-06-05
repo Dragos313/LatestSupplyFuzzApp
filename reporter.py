@@ -118,7 +118,7 @@ class Reporter:
         full_vector = f"CVSS:3.1/{base_vector}/{impact}"
         return f"{score:.1f} ({full_vector})", color
 
-    def generate_final_report(self, fuzzed_package=None):
+    def generate_final_report(self, fuzzed_package=None, fuzzed_function=None):
         if not self.report_path.exists():
             return "Eroare: Nu s-a gasit raportul de scanare."
 
@@ -160,13 +160,15 @@ class Reporter:
 
         # 2. Entry-points (doar cele compilabile)
         report_md += "## 2. Detalii Target-uri Identificate\n"
-        report_md += "| Pachet | Functie | Fisier | Severitate |\n| :--- | :--- | :--- | :--- |\n"
+        report_md += "| Pachet | Functie | Locatie (Fisier:Linie) | Severitate |\n| :--- | :--- | :--- | :--- |\n"
         if harnessable:
             for t in harnessable:
                 pkg = t.get('package_name', 'N/A')
                 func = t.get('function_name', 'N/A')
                 path = t.get('file', t.get('path', 'N/A'))
-                report_md += f"| {pkg} | `{func}` | `{path}` | MEDIUM |\n"
+                line = t.get('line')
+                loc = f"{path}:{line}" if line not in (None, 0, '?') else path
+                report_md += f"| {pkg} | `{func}` | `{loc}` | MEDIUM |\n"
         else:
             report_md += "| - | (niciun entry-point compilabil) | - | - |\n"
         if skipped > 0:
@@ -217,7 +219,25 @@ class Reporter:
         # 4. Crashes + PoC
         report_md += "\n## 4. Crash-uri Confirmate & Proof-of-Concept\n"
         if crashes_info:
-            ref_func = entrypoints[0].get('function_name', 'unknown') if entrypoints else 'unknown'
+            # Folosim functia fuzzata efectiv (aleasa de orchestrator dupa scor),
+            # nu primul entry-point detectat (care poate fi o functie interna
+            # ne-harnessabila, ex: internal_realloc). Cautam si locatia ei.
+            ref_func = fuzzed_function
+            ref_loc = None
+            if ref_func:
+                match = next((t for t in entrypoints
+                              if t.get('function_name') == ref_func), None)
+                if match:
+                    ref_loc = f"{match.get('file','?')}:{match.get('line','?')}"
+            if not ref_func:
+                ref_func = entrypoints[0].get('function_name', 'unknown') if entrypoints else 'unknown'
+
+            if ref_loc:
+                report_md += (f"> Toate crash-urile provin din fuzzing-ul functiei "
+                              f"`{ref_func}` ({ref_loc}).\n")
+            else:
+                report_md += f"> Toate crash-urile provin din fuzzing-ul functiei `{ref_func}`.\n"
+
             for c in crashes_info:
                 cvss_score, _ = self._estimate_cvss(c['crash_type'], ref_func, len(crashes_info))
                 report_md += f"\n### Crash #{c['index']}: `{c['crash_type']}`\n"
