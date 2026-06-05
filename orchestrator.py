@@ -123,6 +123,9 @@ class Orchestrator:
         if name == "LLVMFuzzerTestOneInput":
             return 10000
         score = 0
+        # transformatoare in-place (minify/transform): OOB clasic
+        if any(k in low for k in ['minify', 'transform', 'compact', 'normalize']):
+            score += 120
         if any(k in low for k in ['parse', 'decode', 'load', 'read',
                                   'deserial', 'unmarshal', 'scan', 'decompress']):
             score += 100

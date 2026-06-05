@@ -90,7 +90,6 @@ fi
 
 export AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1
 export AFL_NO_UI=1
-export AFL_SKIP_CRASHES=1
 
 DICT_ARG=""
 if {"true" if use_dictionary else "false"} && [ -f ./afl_tokens.dict ]; then

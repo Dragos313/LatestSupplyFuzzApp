@@ -123,3 +123,13 @@ rules:
       ...
       *$PTR = $VAL;
     message: "malloc fara verificare NULL (CWE-476): $PTR poate fi NULL."
+  
+  - id: find-fuzzable-c-functions-entrypoint-generic
+    languages: [generic]
+    severity: WARNING
+    metadata:
+      target_kind: entrypoint
+      cwe: "Fuzzable entry point"
+    patterns:
+      - pattern-regex: '(?i)\b[A-Za-z_]\w*(?:parse|load|read|decode|deserial|scan|lex|tokeniz|import|unmarshal|deflate|inflate|uncompress|decompress|minify|transform|compact|normalize)\w*\s*\([^;{}()]*\)\s*\{'
+    message: "Fuzzabil (entry-point candidat)"

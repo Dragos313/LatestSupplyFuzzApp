@@ -66,12 +66,23 @@ class Reporter:
             shutil.copy2(crash_file, dest_path)
 
             crash_type = "UNKNOWN"
-            fname = crash_file.name.lower()
-            if "sig:06" in fname:   crash_type = "SIGABRT (Heap Corruption / Assert)"
-            elif "sig:11" in fname: crash_type = "SIGSEGV (Segmentation Fault)"
-            elif "sig:07" in fname: crash_type = "SIGBUS (Bus Error)"
-            elif "sig:08" in fname: crash_type = "SIGFPE (Floating Point / Div-by-Zero)"
-            elif "asan" in fname:   crash_type = "AddressSanitizer (Buffer Overflow / UAF)"
+            # Windows inlocuieste ':' (interzis in numele de fisier) cu U+F03A din
+            # zona Unicode privata. AFL scrie 'sig:06', dar pe disc devine 'sig\uf03a06'.
+            # Normalizam inapoi la ':' (plus fullwidth ':' U+FF1A, intalnit pe unele
+            # configuratii) ca sa potrivim corect semnalul. Acceptam si separatorul '_'.
+            fname = (crash_file.name.lower()
+                     .replace('\uf03a', ':')
+                     .replace('\uff1a', ':'))
+            if "sig:06" in fname or "sig_06" in fname:
+                crash_type = "SIGABRT (Heap Corruption / Assert)"
+            elif "sig:11" in fname or "sig_11" in fname:
+                crash_type = "SIGSEGV (Segmentation Fault)"
+            elif "sig:07" in fname or "sig_07" in fname:
+                crash_type = "SIGBUS (Bus Error)"
+            elif "sig:08" in fname or "sig_08" in fname:
+                crash_type = "SIGFPE (Floating Point / Div-by-Zero)"
+            elif "asan" in fname:
+                crash_type = "AddressSanitizer (Buffer Overflow / UAF)"
 
             crashes_info.append({
                 "index": i + 1,
