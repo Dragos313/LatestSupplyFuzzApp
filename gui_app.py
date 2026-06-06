@@ -212,7 +212,7 @@ class SupplyFuzzApp(ctk.CTk):
                      text_color=C["muted"]).grid(row=0, column=0, sticky="w")
         self.url_entry = ctk.CTkEntry(
             url_row,
-            placeholder_text="https://github.com/user/repo  sau  cale locală",
+            placeholder_text="https://github.com/user/repo sau cale locala",
             height=38, corner_radius=6,
             border_color=C["border"],
             font=ctk.CTkFont(family=MONO, size=13))
@@ -235,7 +235,7 @@ class SupplyFuzzApp(ctk.CTk):
         self.time_entry.grid(row=0, column=1, padx=(0, 20))
 
         self.use_dict_var = ctk.BooleanVar(value=True)
-        ctk.CTkCheckBox(left, text="Dicționar hibrid (static→fuzz)",
+        ctk.CTkCheckBox(left, text="Dictionar hibrid (static→fuzz)",
                         variable=self.use_dict_var,
                         checkmark_color=C["teal"],
                         font=ctk.CTkFont(size=12)).grid(row=0, column=2, padx=(0, 8))
@@ -308,7 +308,7 @@ class SupplyFuzzApp(ctk.CTk):
             corner_radius=8)
         self.results_textbox.grid(row=1, column=0, sticky="nsew")
         self.results_textbox.insert("0.0",
-            "Sistema pregătit.\nIntroduceți URL-ul unui repo GitHub sau o cale locală și apăsați Start.\n")
+            "Sistem pregatit.\nIntroduceti URL-ul unui repo GitHub sau o cale locala si apasati Start.\n")
 
     # ─────────────────────────────────────────
     # TAB 2 — REPORT
