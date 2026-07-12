@@ -249,39 +249,36 @@ class Bridge:
         self.workspace.mkdir(parents=True, exist_ok=True)
 
         harness_code = f"""
-#include <stdint.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <stdlib.h>
+        #include <stdint.h>
+        #include <stddef.h>
+        #include <stdio.h>
+        #include <stdlib.h>
 
-// Prototipul dedus inteligent de The Scout
-// NOTA: daca functia tinta este C++ (nu extern "C"), schimbati declaratia
-//       de mai jos sau includeti header-ul real pentru a evita numele mangled.
-extern "C" int {func_name}({args_definition});
+        extern "C" int {func_name}({args_definition});
 
-int main(int argc, char **argv) {{
-    if (argc < 2) return 1;
+        int main(int argc, char **argv) {{
+            if (argc < 2) return 1;
 
-    FILE *f = fopen(argv[1], "rb");
-    if (!f) return 1;
+            FILE *f = fopen(argv[1], "rb");
+            if (!f) return 1;
 
-    fseek(f, 0, SEEK_END);
-    size_t len = ftell(f);
-    fseek(f, 0, SEEK_SET);
+            fseek(f, 0, SEEK_END);
+            size_t len = ftell(f);
+            fseek(f, 0, SEEK_SET);
 
-    uint8_t *buf = (uint8_t *)malloc(len + 1);
-    if (!buf) {{ fclose(f); return 1; }}
+            uint8_t *buf = (uint8_t *)malloc(len + 1);
+            if (!buf) {{ fclose(f); return 1; }}
 
-    if (fread(buf, 1, len, f) != len) {{ /* tolerate short read */ }}
-    buf[len] = '\\0';
-    fclose(f);
+            if (fread(buf, 1, len, f) != len) {{ /* tolerate short read */ }}
+            buf[len] = '\\0';
+            fclose(f);
 
-    {func_name}({call_params_str});
+            {func_name}({call_params_str});
 
-    free(buf);
-    return 0;
-}}
-"""
+            free(buf);
+            return 0;
+        }}
+        """
         with open(harness_path, 'w', encoding='utf-8') as f:
             f.write(harness_code)
         return harness_path

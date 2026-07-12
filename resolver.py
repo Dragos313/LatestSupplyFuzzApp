@@ -50,7 +50,6 @@ class NPMResolver:
 
 
 # =============================================================================
-# NOU: PyPI Resolver
 # Detectează pachete Python cu extensii native C/C++ (via setup.py sau
 # pyproject.toml care conțin ext_modules sau cffi/cython).
 # Acoperă un vector important din supply chain-ul modern Python.

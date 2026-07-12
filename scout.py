@@ -24,9 +24,6 @@ class Scout:
         self.rules_path = self._locate_rules()
         self.is_windows = platform.system() == "Windows"
 
-    # -------------------------------------------------------------------------
-    # FIX #1: cautam fisierul de reguli in mai multe locatii.
-    # -------------------------------------------------------------------------
     def _locate_rules(self):
         here = Path(__file__).parent
         candidates = [
@@ -73,11 +70,6 @@ class Scout:
                     return str(candidate)
         return None
 
-    # -------------------------------------------------------------------------
-    # FIX #2 (NOU): extragem numele functiei + argumentele DIRECT din sursa,
-    # la linia raportata de semgrep. Nu mai depindem de metavariabila $FUNC sau
-    # de campul "lines" (care la unele versiuni semgrep e mascat "requires login").
-    # -------------------------------------------------------------------------
     def _extract_signature(self, file_path, start_line):
         """
         Returneaza (func_name, args_list, is_static).
