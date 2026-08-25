@@ -108,8 +108,9 @@ In the dashboard, paste a GitHub URL (or a local path), set a fuzzing duration, 
 ├── scout.py               # Semgrep static analysis + harnessability classifier
 ├── scout_logic.yaml       # Semgrep rules (entry points + CWE sinks)
 ├── bridge.py              # Harness + hybrid dictionary + seed synthesis
+├── hammer.py              # AFL++ in Docker + AddressSan.
 ├── reporter.py            # CVSS estimation + Markdown report generation
-├── main.py                # CustomTkinter GUI
+├── main.py                # CustomTkinter GUI 
 ├── Dockerfile             # AFL++ / LLVM / ASan fuzzing container
 ├── requirements.txt
 └── README.md
@@ -118,8 +119,6 @@ In the dashboard, paste a GitHub URL (or a local path), set a fuzzing duration, 
 ├── fuzz_workspace/        # cloned repos, harnesses, dictionaries, corpora, crashes
 └── scans_history/         # timestamped reports + proof_of_concept/ artifacts
 ```
-
-> Adjust the file names above to match your actual repository layout.
 
 ---
 
